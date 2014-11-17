@@ -4,7 +4,9 @@
 #include <string.h>
 #include "affinity.h"
 
-void* f(void* msg) {
+#define UNUSED(x) x __attribute__((unused))
+
+void* f(void* UNUSED(msg)) {
   long long l = 0;
   while (1) {
     l++;
@@ -36,6 +38,8 @@ int main(int argc, char** argv) {
     pthread_create_with_cpu_affinity(&second, 1, NULL, f, "second");
   } else {
     usage(argv);
+    return 1;
   }
   pthread_join(first, NULL);
+  return 0;
 }
