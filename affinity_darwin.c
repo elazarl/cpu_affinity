@@ -9,6 +9,9 @@
 
 #include "affinity.h"
 
+int get_thread_id() {
+  return pthread_mach_thread_np(pthread_self());
+}
 
 int numphyscpus() {
   int numcpus;

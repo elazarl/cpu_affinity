@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <pthread.h>
 #include <string.h>
 #include "affinity.h"
@@ -7,6 +8,7 @@
 #define UNUSED(x) x __attribute__((unused))
 
 void* f(void* UNUSED(msg)) {
+  printf("tid: %d\n", get_thread_id());
   long long l = 0;
   while (1) {
     l++;
@@ -24,6 +26,7 @@ int main(int argc, char** argv) {
   if (argc != 2) {
     usage(argv);
   }
+  printf("pid: %d\n", getpid());
   if (strcmp(argv[1], "regular") == 0) {
     puts("creating regular threads");
     pthread_create(&first, NULL, f, "first");
