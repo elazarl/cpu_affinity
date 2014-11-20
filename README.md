@@ -30,8 +30,8 @@ The dtrace script produces a valid json consumable by `trace2html`.
 
 Here is an example [trace output](https://rawgit.com/elazarl/cpu_affinity/master/trace.html).
 
-Process `9052` defined both threads to be in different affinity sets, while process
-`9096` defined both to be in the same affinity set.
+Process `89397` defined both threads to be in different affinity sets, while process
+`89442` defined both to be in the same affinity set.
 
 Initially it looked like it worked, when setting the two threads with the same affinity, you can see
 that they're always scheduled in parallel, on different CPUs.

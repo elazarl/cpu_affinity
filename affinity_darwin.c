@@ -29,7 +29,7 @@ int pthread_create_with_cpu_affinity(pthread_t *restrict thread, int cpu,
   if (rv != 0) {
     return rv;
   }
-  thread_policy_set((thread_t)thread, THREAD_AFFINITY_POLICY, (thread_policy_t)&policy_data, 1);
+  thread_policy_set((thread_t)thread, THREAD_AFFINITY_POLICY, (thread_policy_t)&policy_data, THREAD_AFFINITY_POLICY_COUNT);
   thread_resume(mach_thread);
   return 0;
 }
