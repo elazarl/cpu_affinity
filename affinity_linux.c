@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <sys/types.h>
+#include <sys/syscall.h>
 #define __USE_GNU
 #include <sched.h>
 
 #include "affinity.h"
 
 int get_thread_id() {
-  return gettid();
+  return syscall(SYS_gettid);
 }
 
 int numphyscpus() {
