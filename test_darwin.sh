@@ -6,7 +6,7 @@ killall test_affinity
 sleep 2
 ./test_affinity antiaffine&
 sleep 2
-sudo ./tracecpu.d test_affinity >trace.txt
-trace2html trace.txt
+sudo ./tracecpu.d test_affinity >test/darwin/trace.txt
+trace2html test/darwin/trace.txt
 killall test_affinity
-open trace.html
+open test/darwin/trace.html
