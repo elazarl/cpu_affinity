@@ -2,6 +2,7 @@
 import os
 import sys
 import re
+import json
 
 class Ts:
     def __init__(self, s=None):
@@ -23,7 +24,7 @@ class Ts:
 class SchedSwitchEvent:
     r = re.compile(r'\s*(.*-\d+)\s+\[(\d+)\] (....) (\d+\.\d+): (sched_switch): prev_comm=(.+) prev_pid=(\d+) prev_prio=(\d+) prev_state=(.+) ==> ' +
             'next_comm=(.*) next_pid=(\d+) next_prio=(\d+)')
-    def __init__(self, line):
+    def __init__(self, line, lineno=None):
         parse = SchedSwitchEvent.r.search(line).groups()
         self.task_pid = parse[0]
         self.cpu = int(parse[1])
@@ -37,6 +38,7 @@ class SchedSwitchEvent:
         self.next_comm = parse[9]
         self.next_pid = int(parse[10])
         self.next_prio = int(parse[11])
+        self.lineno = lineno
     def __repr__(self):
         return repr(self.__dict__)
 
@@ -45,22 +47,26 @@ if __name__ == '__main__':
     proc_name = sys.argv[1]
     tid_start = {}
     print('[')
-    offset = -1
+    offset = None
+    lineno = 0
     while True:
         line = sys.stdin.readline()
+        lineno += 1
         if not line or line[-1] != '\n':
             break
         if not 'sched_switch:' in line:
             continue
-        ev = SchedSwitchEvent(line)
-        if offset < 0:
-            offset = Ts(ev.timestamp)
+        ev = SchedSwitchEvent(line, lineno)
         if ev.prev_comm == proc_name:
-            if tid_start.get(ev.prev_pid):
-                start, end = Ts(tid_start[ev.prev_pid]), Ts(ev.timestamp)
-                print('{"name":"%d", "cat":"cpu %d", "ts":%s, "dur": %s, "pid":"%s", "tid": %d, "ph": "X"},'%
-                    (ev.cpu, ev.cpu, start-offset, end-start, proc_name, ev.prev_pid))
+            start_ev = tid_start.get(ev.prev_pid)
+            if start_ev:
+                start, end = Ts(start_ev.timestamp), Ts(ev.timestamp)
+                print(('{"name":"%d", "cat":"cpu %d", "ts":%s, "dur": %s, "pid":"%s", "tid": %d, "ph": "X", '+
+                    '"args":{"prev_line":%d, "next_line": %d}},')%
+                    (ev.cpu, ev.cpu, start-offset, end-start, proc_name, ev.prev_pid, start_ev.lineno, ev.lineno))
                 del tid_start[ev.prev_pid]
         if ev.next_comm == proc_name:
-            tid_start[ev.next_pid] = ev.timestamp
+            if not offset:
+                offset = Ts(ev.timestamp)
+            tid_start[ev.next_pid] = ev
     print('""]')
