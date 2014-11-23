@@ -16,33 +16,47 @@ void* f(void* UNUSED(msg)) {
 }
 
 void usage(char** argv) {
-  puts("A program that runs 2 threads, with optional CPU affinity");
-  printf("usage: %s regular|affine|antiaffine\n", argv[0]);
+  puts("A program that runs threads, with optional CPU affinity");
+  printf("usage: %s regular|affine|antiaffine [nthreads]\n", argv[0]);
   exit(1);
 }
 
 int main(int argc, char** argv) {
-  pthread_t first, second;
-  if (argc != 2) {
+  pthread_t thread;
+  int n;
+  int ncpu = numphyscpus();
+  if (argc != 3 && argc != 2) {
     usage(argv);
+    return 1;
   }
-  printf("pid: %d\n", getpid());
+  n = numphyscpus();
+  if (argc == 3) {
+    n = strtol(argv[1], NULL, 10);
+  }
+  printf("pid: %d, running %d threads\n", getpid(), n);
+  if (n == 0) {
+    puts("Number of threads should be an integer");
+    return 2;
+  }
   if (strcmp(argv[1], "regular") == 0) {
     puts("creating regular threads");
-    pthread_create(&first, NULL, f, "first");
-    pthread_create(&second, NULL, f, "second");
+    for (; n>0; n--) {
+      pthread_create(&thread, NULL, f, NULL);
+    }
   } else if (strcmp(argv[1], "affine") == 0) {
     puts("creating threads with a different same CPU affinity");
-    pthread_create_with_cpu_affinity(&first, 1, NULL, f, "first");
-    pthread_create_with_cpu_affinity(&second, 2, NULL, f, "second");
+    for (; n>0; n--) {
+      pthread_create_with_cpu_affinity(&thread, n%ncpu, NULL, f, "first");
+    }
   } else if (strcmp(argv[1], "antiaffine") == 0) {
     puts("creating threads with the same CPU affinity");
-    pthread_create_with_cpu_affinity(&first, 1, NULL, f, "first");
-    pthread_create_with_cpu_affinity(&second, 1, NULL, f, "second");
+    for (; n>0; n--) {
+      pthread_create_with_cpu_affinity(&thread, 0, NULL, f, "first");
+    }
   } else {
     usage(argv);
     return 1;
   }
-  pthread_join(first, NULL);
+  pthread_join(thread, NULL);
   return 0;
 }
