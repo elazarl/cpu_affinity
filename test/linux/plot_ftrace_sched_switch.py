@@ -22,10 +22,13 @@ class Ts:
         return '%d' % self.usec
         
 class SchedSwitchEvent:
-    r = re.compile(r'\s*(.*-\d+)\s+\[(\d+)\] (....) (\d+\.\d+): (sched_switch): prev_comm=(.+) prev_pid=(\d+) prev_prio=(\d+) prev_state=(.+) ==> ' +
-            'next_comm=(.*) next_pid=(\d+) next_prio=(\d+)')
+    r = re.compile(r'\s*(.*-\d+)\s+\[(\d+)\]\s+(....)\s+(\d+\.\d+):\s+(sched_switch):\s+prev_comm=(.+)\s+prev_pid=(\d+)\s+prev_prio=(\d+)\s+prev_state=(.+)\s+==>\s+' +
+            'next_comm=(.*)\s+next_pid=(\d+)\s+next_prio=(\d+)')
     def __init__(self, line, lineno=None):
-        parse = SchedSwitchEvent.r.search(line).groups()
+        parse = SchedSwitchEvent.r.search(line)
+        if not parse:
+            raise Exception("BAD line %s" % repr(line))
+        parse = parse.groups()
         self.task_pid = parse[0]
         self.cpu = int(parse[1])
         self.flags = parse[2]
