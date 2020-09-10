@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
   }
   n = numphyscpus();
   if (argc == 3) {
-    n = strtol(argv[1], NULL, 10);
+    n = strtol(argv[2], NULL, 10);
   }
   printf("pid: %d, running %d threads\n", getpid(), n);
   if (n == 0) {
