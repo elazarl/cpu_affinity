@@ -1,10 +1,9 @@
 #include <stdio.h>
 #include <mach/thread_policy.h>
 #include <mach/task_info.h>
+#include <mach/thread_act.h>
 #include <sys/types.h>
 #include <sys/sysctl.h>
-#include <mach/thread_policy.h>
-#include <mach/thread_act.h>
 #include <pthread.h>
 
 #include "affinity.h"
@@ -29,7 +28,7 @@ int pthread_create_with_cpu_affinity(pthread_t *restrict thread, int cpu,
   if (rv != 0) {
     return rv;
   }
-  thread_policy_set((thread_t)thread, THREAD_AFFINITY_POLICY, (thread_policy_t)&policy_data, THREAD_AFFINITY_POLICY_COUNT);
+  thread_policy_set(mach_thread, THREAD_AFFINITY_POLICY, (thread_policy_t)&policy_data, THREAD_AFFINITY_POLICY_COUNT);
   thread_resume(mach_thread);
   return 0;
 }
